@@ -1,0 +1,184 @@
+#include "GL/freeglut.h"
+#include "GL/gl.h"
+#include <math.h>
+
+
+float py, px, pdx, pdy, pa; //posição de personagem
+int mpx = 8, mpy = 8, mps = 64;
+const float PI = M_PI, P2 = M_PI/2, P3 = 3*M_PI/2;
+
+
+void init();
+void display();
+void drawMap2D();
+void drawplayer();
+void drawraio();
+void control(int key, int y, int x);
+
+
+int mapa[] = {1,1,1,1,1,1,1,1,
+	      1,0,0,0,0,0,0,1,
+	      1,0,1,1,0,0,0,1,
+	      1,0,0,0,0,0,0,1,
+	      1,0,0,0,0,0,0,1,
+	      1,0,0,0,0,0,0,1,
+	      1,0,0,0,0,0,0,1,
+	      1,1,1,1,1,1,1,1};
+
+int main(int argc, char **argv){
+	glutInit(&argc, argv); //inicia a lib
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
+	glutInitWindowSize(1024, 512);
+	glutCreateWindow("labirinto 3d");
+	init();
+	glutDisplayFunc(display);
+	glutSpecialFunc(control); //Estabelece a função callback que é chamada pela GLUT cada vez que uma tecla que gera código não-ASCII é pressionada, tais como Home, End, PgUp, PgDn, F1 e F2.
+
+	
+	glutMainLoop();
+	
+	return 0;
+
+
+}
+
+void drawPlayer(){
+	glColor3f(1, 1, 0);
+	glPointSize(8); // 8x8
+	
+	//desenhar o grafico
+	glBegin(GL_POINTS); 
+		glVertex2i(px, py);
+	glEnd();
+	
+	
+	glLineWidth(3);
+	glBegin(GL_LINES); 
+		glVertex2i(px, py);
+		glVertex2i(px+pdx*5, py+pdy*5);
+	glEnd();
+
+
+}
+
+void control(int key, int y, int x){
+	if(key == GLUT_KEY_LEFT) {
+		pa -= 0.1; 	 	
+		if(pa<0){
+			pa+=2*PI;
+		}
+		pdx=cos(pa)*5;
+		pdy=sin(pa)*5;
+		
+	}
+	
+	if(key == GLUT_KEY_RIGHT){
+		pa += 0.1;
+		if(pa>2*PI){
+			pa-=2*PI;
+		}
+		pdx=cos(pa)*5;
+		pdy=sin(pa)*5;
+		
+	}
+	
+	if(key == GLUT_KEY_UP) {px+=pdx; py+=pdy;};
+	if(key == GLUT_KEY_DOWN) {px-=pdx; py-=pdy;};
+	glutPostRedisplay(); //chama o display com atualização
+
+}
+
+void drawMap2D(){
+	int x, y, x2, y2;
+	for(y=0; y < mpy; y++){
+		for(x=0; x < mpx; x++){
+			if(mapa[y*mpx+x]==1) glColor3f(1, 1, 1);
+			else glColor3f(0, 0, 0);
+			
+			
+			x2 = x*mps;
+			y2 = y*mps;
+			glBegin(GL_QUADS);
+				glVertex2i(x2+1     ,y2+1);
+				glVertex2i(x2+1     ,y2+mps-1);
+				glVertex2i(x2+mps-1 ,y2+mps-1);
+				glVertex2i(x2+mps-1 ,y2+1);
+			glEnd();
+		}
+	}
+	
+}
+
+
+void drawraio(){
+	int r, mx, my, map, dot;
+	
+	float rx, ry, ra, x0, y0;
+	
+	ra = pa;
+	
+	for(r=0; r<1; r++){
+		dot = 0;
+		float aTan =-1/tan(ra);
+		if(ra > PI){
+			ry=(((int)py>>6)<<6)-0.0001; 
+			rx=(py-ry)*aTan+px; 
+			y0=-64; 
+			x0=-y0*aTan;	
+		}
+		
+		if(ra < PI){
+			ry=(((int)py>>6)<<6)+64; 
+			rx=(py-ry)*aTan+px; 
+			y0=64; 
+			x0=-y0*aTan;
+		}
+		
+		if(ra == 0 || ra == PI){
+			rx=px; 
+			ry=py;
+			dot=8;
+		}
+		
+		while(dot < 8){
+			mx=(int)(rx)>>6; 
+			my=(int)(ry)>>6; 
+			map=my*mpx+mx;
+			if(map < mpx*mpy && mapa[map]==1){
+				dot = 8;	
+			}else{
+				rx+=x0;
+				ry+=y0;
+				dot+=1;
+			}
+		}
+		
+		glColor3f(0, 1, 0);
+		glLineWidth(1);
+		glBegin(GL_LINES); 
+			glVertex2i(px, py);
+			glVertex2i(rx, ry);
+		glEnd();
+			
+	}
+}
+
+
+void display(){
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //LIMPA O BUFFER QUANDO É CHAMADO
+	drawMap2D();
+	drawraio();
+	drawPlayer();
+	glutSwapBuffers();
+}
+
+void init(){
+	glClearColor(0.3, 0.3, 0.3, 0);
+	gluOrtho2D(0, 1024, 512, 0);
+	py = 300;
+	px = 300;
+	pdx = cos(pa)*5;
+	pdy = sin(pa)*5;
+}
+
+
