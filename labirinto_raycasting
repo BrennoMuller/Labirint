@@ -1,7 +1,7 @@
 #include "GL/freeglut.h"
 #include "GL/gl.h"
 #include <math.h>
-#define GR 0.174533 // grau radiano
+#define GR 0.0174533 // grau radiano
 
 
 float py, px, pdx, pdy, pa; //posição de personagem
@@ -67,7 +67,7 @@ void control(int key, int y, int x){
 	if(key == GLUT_KEY_LEFT) {
 		pa -= 0.1; 	 	
 		if(pa<0){
-			pa+=2*PI;
+			pa+=2*PI;		
 		}
 		pdx=cos(pa)*5;
 		pdy=sin(pa)*5;
@@ -85,7 +85,11 @@ void control(int key, int y, int x){
 	}
 	
 	if(key == GLUT_KEY_UP) {px+=pdx; py+=pdy;};
+	
+	
 	if(key == GLUT_KEY_DOWN) {px-=pdx; py-=pdy;};
+	
+	
 	glutPostRedisplay(); //chama o display com atualização
 
 }
@@ -122,16 +126,16 @@ void drawraio(){
 	
 	float rx, ry, ra, x0, y0;
 	
-	ra = pa-GR*30;
-	if(ra < 0){ra+=2*PI;}
+	ra = pa-30*GR;
+	if(ra<   0){ra+=2*PI;}
 	if(ra>2*PI){ra-=2*PI;}
 	
-	for(r=0; r<1; r++){
+	for(r=0; r<60; r++){
 	
 		//vertical
 		dot = 0;
 		float distH = 100000, hx=px, hy=py;
-		float aTan =-1/tan(ra);
+		float aTan=-1/tan(ra);
 		if(ra > PI){
 			ry=(((int)py>>6)<<6)-0.0001; 
 			rx=(py-ry)*aTan+px; 
@@ -156,35 +160,39 @@ void drawraio(){
 			mx=(int)(rx)>>6; 
 			my=(int)(ry)>>6; 
 			map=my*mpx+mx;
-			if(map < 0 && mpx*mpy && mapa[map]==1){
-				hx = rx; hy=ry; distH=dist(px, py, hx, hy, ra); dot = 8;	
+			
+			if(map > 0 && map < mpx*mpy && mapa[map]==1){
+				hx = rx; 
+				hy=ry; 
+				distH=dist(px, py, hx, hy, ra); 
+				dot = 8;	
 			}else{
 				rx+=x0;
 				ry+=y0;
 				dot+=1;
 			}
-		}
+		}			
 		
 		
 		//horizontal
 		dot = 0;
-		float distV = 10000, vx=px, vy=py;
+		float distV = 100000, vx=px, vy=py;
 		float nTan =-tan(ra);
-		if(ra > P2 && ra < P3);{
+		if(ra > P2 && ra < P3){
 			rx=(((int)px>>6)<<6)-0.0001; 
-			ry=(px-rx)* nTan+py; 
+			ry=(px-rx)*nTan+py; 
 			x0=-64; 
 			y0=-x0*nTan;	
 		}
 		
-		if(ra < P2 || ra>P3){
+		if(ra < P2 || ra > P3){
 			rx=(((int)px>>6)<<6)+64; 
 			ry=(px-rx)*nTan+py; 
 			x0=64; 
 			y0=-x0*nTan;
 		}
 		
-		if(ra == 0 || ra == PI){
+		if(ra==0 || ra == PI){
 			rx=px; 
 			ry=py;
 			dot=8;
@@ -194,25 +202,32 @@ void drawraio(){
 			mx=(int)(rx)>>6; 
 			my=(int)(ry)>>6; 
 			map=my*mpx+mx;
-			if(map > 0 && mpx*mpy && mapa[map]==1){
-				vx = vx; vy=vy; distV=dist(px, py, vx, vy, ra); dot = 8;		
+			if(map > 0 && map < mpx*mpy && mapa[map]==1){
+				vx = rx; 		
+				vy=ry; 
+				distV=dist(px, py, vx, vy, ra); 
+				dot = 8;		
 			}else{
 				rx+=x0;
 				ry+=y0;
 				dot+=1;
 			}
 		}
-		if(distV<distH){rx = vx; ry=vy;}
-		if(distH<distV){rx = hx; ry=hy; }
+		
+		if(distV < distH){rx = vx; ry=vy;}		
+		if(distH < distV){rx = hx; ry=hy; }
+		
 		glColor3f(1, 0, 0);
-		glLineWidth(3);
+		glLineWidth(2);
 		glBegin(GL_LINES); 
 			glVertex2i(px, py);
 			glVertex2i(rx, ry);
 		glEnd();
 		
-		if(ra < 1){ra+=2*PI;}
-		if(ra > 2*PI){ra-=2*PI;}	
+		ra+=GR;
+		
+		if(ra<     1){ra += 2*PI;}
+		if(ra > 2*PI){ra -= 2*PI;}	
 			
 		
 	}
@@ -232,6 +247,7 @@ void init(){
 	gluOrtho2D(0, 1024, 512, 0);
 	py = 300;
 	px = 300;
+	
 	pdx = cos(pa)*5;
 	pdy = sin(pa)*5;
 }
