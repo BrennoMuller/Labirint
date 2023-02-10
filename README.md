@@ -2,4 +2,7 @@
 
 Labirinto raycasting feito em c++ utilizando a biblioteca Open GL Glut / Freeglut
 
-![Captura de tela de 2023-01-09 05-07-21](https://user-images.githubusercontent.com/82506300/211264601-9147d0e5-ab7c-49de-a6b4-d5941aaa13d2.png)
+
+![Captura de tela de 2023-02-10 20-40-48](https://user-images.githubusercontent.com/82506300/218222469-dad18016-efa7-4410-8515-c806944da93f.png)
+
+![Captura de tela de 2023-02-10 20-41-14](https://user-images.githubusercontent.com/82506300/218222470-81e2dd93-410d-4dde-860e-0133bea451e2.png)
